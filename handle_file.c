@@ -18,11 +18,12 @@ void file_read_csv_write_binary(const char *nome_arq_dados, const char *nome_arq
 	if(nome_arq_dados != NULL)
 	{
 		int codigo = 0, escola_size = 0, cidade_size = 0, prestadora_size = 0, total_bytes = 0;
-		char byte_padding = 0x00, prestadora[10], data[11], escola[50], cidade[70], uf[3], line[300], *tokken = NULL;
+		char byte_padding = 0x00, prestadora[10], data[11], escola[50], cidade[70], uf[3], line[300], *token = NULL;
 		HEADER binario_h;
 		FILE *csv = NULL, *binario = NULL;
 		binario_h.topoPilha = -1;
 		binario_h.status = '0';
+		
 		csv = fopen(nome_arq_dados, "r");
 		binario = fopen(nome_arq_binario, "wb");
 		fwrite(&binario_h.status, sizeof(binario_h.status), 1, binario);
@@ -47,52 +48,52 @@ void file_read_csv_write_binary(const char *nome_arq_dados, const char *nome_arq
 					sscanf(line, "%10[^;]", prestadora);
 					prestadora_size = strlen(prestadora);
 				}
-				tokken = strstr(line, ";");
-				++tokken;
-				if(tokken[0] == ';')
+				token = strstr(line, ";");
+				++token;
+				if(token[0] == ';')
 				{
 					memset(data, -1, 10);
 				}
 				else
 				{
-					sscanf(tokken, "%10[^;]", data);
+					sscanf(token, "%10[^;]", data);
 				}
-				tokken = strstr(tokken, ";");
-				++tokken;
-				sscanf(tokken, "%d", &codigo);
-				tokken = strstr(tokken, ";");
-				++tokken;
-				if(tokken[0] == ';')
+				token = strstr(token, ";");
+				++token;
+				sscanf(token, "%d", &codigo);
+				token = strstr(token, ";");
+				++token;
+				if(token[0] == ';')
 				{
 					memset(escola, 0, sizeof(escola));
 					escola_size = 0;
 				}
 				else
 				{
-					sscanf(tokken, "%50[^;\n]", escola);
+					sscanf(token, "%50[^;\n]", escola);
 					escola_size = strlen(escola);
 				}
-				tokken = strstr(tokken, ";");
-				++tokken;
-				if(tokken[0] == ';')
+				token = strstr(token, ";");
+				++token;
+				if(token[0] == ';')
 				{
 					memset(cidade, 0, sizeof(cidade));
 					cidade_size = 0;
 				}
 				else
 				{
-					sscanf(tokken, "%70[^;\n]", cidade);
+					sscanf(token, "%70[^;\n]", cidade);
 					cidade_size = strlen(cidade);
 				}
-				tokken = strstr(tokken, ";");
-				++tokken;
-				if(tokken[0] == '\n')
+				token = strstr(token, ";");
+				++token;
+				if(token[0] == '\n')
 				{
 					memset(data, -1, 2);
 				}
 				else
 				{
-					sscanf(tokken, "%2s\n", uf);
+					sscanf(token, "%2s\n", uf);
 				}
 				fwrite(&codigo, sizeof(codigo), 1, binario);
 				fwrite(&data, strlen(data), 1, binario);
