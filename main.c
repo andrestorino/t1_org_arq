@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
 				exit(EXIT_FAILURE);
 			}
 			else{
-
+				file_compact(FILE_NAME);
 			}
 			break;
 		case '9':	//Recupera os RRNs da pilha de registros removidos
