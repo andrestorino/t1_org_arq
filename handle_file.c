@@ -156,7 +156,7 @@ void file_read_all_binary(const char *nome_arq_binario){
 				if(codigoINEP != -1 && feof(binario) == 0){
 					printf("%d ", codigoINEP);
 					fread(data, (sizeof(data) - 1), 1, binario);
-					if(data[0] != '0')
+					if(strcmp(data, "0000000000") != 0)
 					{
 						printf("%s ", data);
 					}
@@ -250,7 +250,7 @@ void file_read_binary_rrn(const char *nome_arq_binario, const int rrn)
 					{
 						printf("%d ", codigoINEP);
 						fread(data, (sizeof(data) - 1), 1, binario);
-						if(data[0] != '0')
+						if(strcmp(data, "0000000000") != 0)
 						{
 							printf("%s ", data);
 						}
@@ -358,7 +358,7 @@ void file_filter_by_criteria(const char *nome_arq_binario, const char *campo, co
 
 					// CAMPOS FIXOS
 					fread(data, (sizeof(data) - 1), 1, binario);
-					if(data[0] != '0')
+					if(strcmp(data, "0000000000") != 0)
 					{
 						if(strncmp("dataAtiv", campo, sizeof(campo)) == 0 && strncmp(data, chave, strlen(chave)) == 0) {
 							printRegister = 1;
@@ -412,7 +412,7 @@ void file_filter_by_criteria(const char *nome_arq_binario, const char *campo, co
 					if(printRegister) { // Se encontrou algum registro que satisfaz o criterio
 						// PRINT_OUTPUT
 						printf("%d ", codigoINEP);
-						if(data[0] != '0') printf("%s ", data);
+						if(strcmp(data, "0000000000") != 0) printf("%s ", data);
 						if(uf[0] != '0') printf("%s ", uf);
 						if(escolaChecker > 0) printf("%d %s ", escolaChecker, escola);
 						if(cidadeChecker > 0) printf("%d %s ", cidadeChecker, cidade);
@@ -537,9 +537,9 @@ void file_update_rrn(const char *nome_arq_binario, int rrn, int newCodigoINEP, c
 					fseek(binario, -sizeof(isRemoved), SEEK_CUR);
 					regsize = 28;
 					fwrite(&newCodigoINEP, sizeof(newCodigoINEP), 1, binario);
-					if(strcmp(newData, "0") == 0) fwrite(&nulo, sizeof(char), 10, binario);
+					if(strcmp(newData, "0000000000") == 0) fwrite(&nulo, sizeof(char), 10, binario);
 					else fwrite(newData, strlen(newData), 1, binario);
-					if(strcmp(newUF, "0") == 0) fwrite(&nulo, sizeof(char), 2, binario);
+					if(newUF[0] == '0') fwrite(&nulo, sizeof(char), 2, binario);
 					else fwrite(newUF, strlen(newUF), 1, binario);
 					campos_variaveis_size = strlen(newEscola);
 					regsize += campos_variaveis_size;
@@ -670,7 +670,7 @@ void file_add_record(const char *nome_arq_binario, int newCodigoINEP, char *newD
 
 					fseek(binario, ((tmp_pilha - 1) * IN_DISK_REG_SIZE) + IN_DISK_HEADER_SIZE, SEEK_SET); // Vai para o comeco do registro e calcula o byte offset do registro logicamente removido
 					fwrite(&newCodigoINEP, sizeof(newCodigoINEP), 1, binario);
-					if(strcmp(newData, "0") == 0) fwrite(&nulo, sizeof(char), 10, binario);
+					if(strcmp(newData, "0000000000") == 0) fwrite(&nulo, sizeof(char), 10, binario);
 					else fwrite(newData, strlen(newData), 1, binario);
 					if(strcmp(newUF, "0") == 0) fwrite(&nulo, sizeof(char), 2, binario);
 					else fwrite(newUF, strlen(newUF), 1, binario);
@@ -732,3 +732,121 @@ void file_add_record(const char *nome_arq_binario, int newCodigoINEP, char *newD
 		printf("Falha no processamento do arquivo.\n");
 	}
 }
+
+// Funcionalidade 8
+// void file_compact(const char *nome_arq_binario)
+// {
+// 	if(nome_arq_binario != NULL)
+// 	{
+// 		int rrn_no_new = 0, codigoINEP = 0, campos_variaveis_size = 0, escola_size = 0, cidade_size = 0, prestadora_size = 0, total_bytes = 0;
+// 		char byte_padding = '0', prestadora[10], data[11], escola[50], cidade[70], uf[3], line[300], *token = NULL;
+// 		HEADER binario_h;
+// 		FILE *newbinario = NULL, *oldbinario = NULL;
+// 		binario_h.topoPilha = -1;
+// 		binario_h.status = '0';
+// 		oldbinario = fopen(nome_arq_binario, "r+b");
+//
+// 		if(oldbinario != NULL)
+// 		{
+// 			newbinario = fopen("tmp.dat", "wb");
+// 			fwrite(&binario_h.status, sizeof(binario_h.status), 1, newbinario);
+// 			fwrite(&binario_h.topoPilha, sizeof(binario_h.topoPilha), 1, newbinario);
+// 			fwrite(&binario_h.status, sizeof(binario_h.status), 1, oldbinario);
+// 			fseek(oldbinario, IN_DISK_HEADER_SIZE, SEEK_SET);
+//
+// 			while(feof(oldbinario) == 0)
+// 			{
+// 					fread(&codigoINEP, sizeof(codigoINEP), 1, oldbinario);
+// 					if(codigoINEP != -1) //ve se nao foi logicamente removido do old
+// 					{
+// 						//resetando as strigns de tamanho variavel
+// 						memset(escola, NULL, sizeof(escola));
+// 						memset(cidade, NULL, sizeof(cidade));
+// 						memset(prestadora, NULL, sizeof(prestadora));
+//
+// 						//lendo do old
+// 						fread(data, (sizeof(data) - 1), 1, oldbinario);
+//
+// 						fread(uf, (sizeof(uf) - 1), 1, oldbinario);
+//
+// 						fread(&campos_variaveis_size, sizeof(int), 1, oldbinario);
+// 						escola_size = campos_variaveis_size;
+// 						fread(escola, campos_variaveis_size, 1, oldbinario);
+//
+// 						fread(&campos_variaveis_size, sizeof(int), 1, oldbinario);
+// 						cidade_size = campos_variaveis_size;
+// 						fread(cidade, campos_variaveis_size, 1, oldbinario);
+//
+// 						fread(&campos_variaveis_size, sizeof(int), 1, oldbinario);
+// 						prestadora_size = campos_variaveis_size;
+// 						fread(prestadora, campos_variaveis_size, 1, oldbinario);
+//
+// 						//escrevendo no new
+// 						fseek(newbinario, IN_DISK_HEADER_SIZE + rrn_no_new*IN_DISK_REG_SIZE, SEEK_SET);
+//
+// 						fwrite(&codigoINEP, sizeof(codigoINEP), 1, newbinario);
+// 						//printf("%d\n", codigoINEP);
+//
+// 						fwrite(data, strlen(data), 1, newbinario);
+// 						//printf("%s\n", data);
+//
+// 						fwrite(uf, strlen(uf), 1, newbinario);
+// 						printf("%s\n", uf);
+//
+// 						fwrite(&escola_size, sizeof(int), 1, newbinario);
+// 						//printf("%d\n", escola_size);
+// 						if(escola_size > 0)
+// 						{
+// 							fwrite(escola, escola_size, 1, newbinario);
+// 						}
+// 						//printf("%s\n", escola);
+//
+// 						fwrite(&cidade_size, sizeof(int), 1, newbinario);
+// 						//printf("%d\n", cidade_size);
+// 						if(cidade_size > 0)
+// 						{
+// 							fwrite(cidade, cidade_size, 1, newbinario);
+// 						}
+// 						//printf("%s\n", cidade);
+//
+// 						fwrite(&prestadora_size, sizeof(int), 1, newbinario);
+// 						//printf("%d\n", prestadora_size);
+// 						if(prestadora_size > 0)
+// 						{
+// 							fwrite(prestadora, prestadora_size, 1, newbinario);
+// 						}
+// 						//printf("%s\n", prestadora);
+//
+// 						//preenchendo o resto do new com zeros e indo para o prox registro do old
+// 						total_bytes = 28 + escola_size + prestadora_size + cidade_size;
+// 						if((IN_DISK_REG_SIZE - total_bytes) > 0)
+// 						{
+// 							fwrite(&byte_padding, (IN_DISK_REG_SIZE - total_bytes), 1, newbinario);
+// 						}
+// 						if(feof(oldbinario) != 0) break;
+// 						fseek(oldbinario, IN_DISK_REG_SIZE - total_bytes, SEEK_CUR);
+// 						rrn_no_new++;
+// 					}
+// 					else //vai para proximo registro do old
+// 					{
+// 						fseek(oldbinario, IN_DISK_REG_SIZE - sizeof(codigoINEP), SEEK_CUR);
+// 					}
+// 			}
+// 			printf("Arquivo de dados compactado com sucesso.\n");
+// 			rewind(newbinario);
+// 			binario_h.status = '1';
+// 			fwrite(&binario_h.status, sizeof(binario_h.status), 1, newbinario);
+// 			fclose(newbinario);
+// 			fclose(oldbinario);
+// 			unlink(nome_arq_binario);
+// 			rename("tmp.dat", nome_arq_binario);
+// 		}
+// 		else
+// 		{
+// 			printf("Falha no processamento do arquivo.\n");
+// 		}
+// 	}
+// 	else
+// 	{
+// 		printf("Falha no processamento do arquivo.\n");
+// }
