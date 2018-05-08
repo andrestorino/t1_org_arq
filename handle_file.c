@@ -537,9 +537,17 @@ void file_update_rrn(const char *nome_arq_binario, int rrn, int newCodigoINEP, c
 					fseek(binario, -sizeof(isRemoved), SEEK_CUR);
 					regsize = 28;
 					fwrite(&newCodigoINEP, sizeof(newCodigoINEP), 1, binario);
-					if(strcmp(newData, "0000000000") == 0) fwrite(&nulo, sizeof(char), 10, binario);
+					if(strcmp(newData, "0000000000") == 0)
+					{
+						for(int i = 0; i < 10; i++)
+							fwrite(&nulo, sizeof(char), 1, binario);
+					}
 					else fwrite(newData, strlen(newData), 1, binario);
-					if(newUF[0] == '0') fwrite(&nulo, sizeof(char), 2, binario);
+					if(newUF[0] == '0')
+					{
+						for(int i = 0; i < 2; i++)
+							fwrite(&nulo, sizeof(char), 1, binario);
+					}
 					else fwrite(newUF, strlen(newUF), 1, binario);
 					campos_variaveis_size = strlen(newEscola);
 					regsize += campos_variaveis_size;
@@ -670,9 +678,17 @@ void file_add_record(const char *nome_arq_binario, int newCodigoINEP, char *newD
 
 					fseek(binario, ((tmp_pilha - 1) * IN_DISK_REG_SIZE) + IN_DISK_HEADER_SIZE, SEEK_SET); // Vai para o comeco do registro e calcula o byte offset do registro logicamente removido
 					fwrite(&newCodigoINEP, sizeof(newCodigoINEP), 1, binario);
-					if(strcmp(newData, "0000000000") == 0) fwrite(&nulo, sizeof(char), 10, binario);
+					if(strcmp(newData, "0000000000") == 0)
+					{
+						for(int i = 0; i < 10; i++)
+							fwrite(&nulo, sizeof(char), 1, binario);
+					}
 					else fwrite(newData, strlen(newData), 1, binario);
-					if(strcmp(newUF, "0") == 0) fwrite(&nulo, sizeof(char), 2, binario);
+					if(newUF[0] == '0')
+					{
+						for(int i = 0; i < 2; i++)
+							fwrite(&nulo, sizeof(char), 1, binario);
+					}
 					else fwrite(newUF, strlen(newUF), 1, binario);
 					campos_variaveis_size = strlen(newEscola);
 					regsize += campos_variaveis_size;
