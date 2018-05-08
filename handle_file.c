@@ -734,119 +734,142 @@ void file_add_record(const char *nome_arq_binario, int newCodigoINEP, char *newD
 }
 
 // Funcionalidade 8
-// void file_compact(const char *nome_arq_binario)
-// {
-// 	if(nome_arq_binario != NULL)
-// 	{
-// 		int rrn_no_new = 0, codigoINEP = 0, campos_variaveis_size = 0, escola_size = 0, cidade_size = 0, prestadora_size = 0, total_bytes = 0;
-// 		char byte_padding = '0', prestadora[10], data[11], escola[50], cidade[70], uf[3], line[300], *token = NULL;
-// 		HEADER binario_h;
-// 		FILE *newbinario = NULL, *oldbinario = NULL;
-// 		binario_h.topoPilha = -1;
-// 		binario_h.status = '0';
-// 		oldbinario = fopen(nome_arq_binario, "r+b");
-//
-// 		if(oldbinario != NULL)
-// 		{
-// 			newbinario = fopen("tmp.dat", "wb");
-// 			fwrite(&binario_h.status, sizeof(binario_h.status), 1, newbinario);
-// 			fwrite(&binario_h.topoPilha, sizeof(binario_h.topoPilha), 1, newbinario);
-// 			fwrite(&binario_h.status, sizeof(binario_h.status), 1, oldbinario);
-// 			fseek(oldbinario, IN_DISK_HEADER_SIZE, SEEK_SET);
-//
-// 			while(feof(oldbinario) == 0)
-// 			{
-// 					fread(&codigoINEP, sizeof(codigoINEP), 1, oldbinario);
-// 					if(codigoINEP != -1) //ve se nao foi logicamente removido do old
-// 					{
-// 						//resetando as strigns de tamanho variavel
-// 						memset(escola, NULL, sizeof(escola));
-// 						memset(cidade, NULL, sizeof(cidade));
-// 						memset(prestadora, NULL, sizeof(prestadora));
-//
-// 						//lendo do old
-// 						fread(data, (sizeof(data) - 1), 1, oldbinario);
-//
-// 						fread(uf, (sizeof(uf) - 1), 1, oldbinario);
-//
-// 						fread(&campos_variaveis_size, sizeof(int), 1, oldbinario);
-// 						escola_size = campos_variaveis_size;
-// 						fread(escola, campos_variaveis_size, 1, oldbinario);
-//
-// 						fread(&campos_variaveis_size, sizeof(int), 1, oldbinario);
-// 						cidade_size = campos_variaveis_size;
-// 						fread(cidade, campos_variaveis_size, 1, oldbinario);
-//
-// 						fread(&campos_variaveis_size, sizeof(int), 1, oldbinario);
-// 						prestadora_size = campos_variaveis_size;
-// 						fread(prestadora, campos_variaveis_size, 1, oldbinario);
-//
-// 						//escrevendo no new
-// 						fseek(newbinario, IN_DISK_HEADER_SIZE + rrn_no_new*IN_DISK_REG_SIZE, SEEK_SET);
-//
-// 						fwrite(&codigoINEP, sizeof(codigoINEP), 1, newbinario);
-// 						//printf("%d\n", codigoINEP);
-//
-// 						fwrite(data, strlen(data), 1, newbinario);
-// 						//printf("%s\n", data);
-//
-// 						fwrite(uf, strlen(uf), 1, newbinario);
-// 						printf("%s\n", uf);
-//
-// 						fwrite(&escola_size, sizeof(int), 1, newbinario);
-// 						//printf("%d\n", escola_size);
-// 						if(escola_size > 0)
-// 						{
-// 							fwrite(escola, escola_size, 1, newbinario);
-// 						}
-// 						//printf("%s\n", escola);
-//
-// 						fwrite(&cidade_size, sizeof(int), 1, newbinario);
-// 						//printf("%d\n", cidade_size);
-// 						if(cidade_size > 0)
-// 						{
-// 							fwrite(cidade, cidade_size, 1, newbinario);
-// 						}
-// 						//printf("%s\n", cidade);
-//
-// 						fwrite(&prestadora_size, sizeof(int), 1, newbinario);
-// 						//printf("%d\n", prestadora_size);
-// 						if(prestadora_size > 0)
-// 						{
-// 							fwrite(prestadora, prestadora_size, 1, newbinario);
-// 						}
-// 						//printf("%s\n", prestadora);
-//
-// 						//preenchendo o resto do new com zeros e indo para o prox registro do old
-// 						total_bytes = 28 + escola_size + prestadora_size + cidade_size;
-// 						if((IN_DISK_REG_SIZE - total_bytes) > 0)
-// 						{
-// 							fwrite(&byte_padding, (IN_DISK_REG_SIZE - total_bytes), 1, newbinario);
-// 						}
-// 						if(feof(oldbinario) != 0) break;
-// 						fseek(oldbinario, IN_DISK_REG_SIZE - total_bytes, SEEK_CUR);
-// 						rrn_no_new++;
-// 					}
-// 					else //vai para proximo registro do old
-// 					{
-// 						fseek(oldbinario, IN_DISK_REG_SIZE - sizeof(codigoINEP), SEEK_CUR);
-// 					}
-// 			}
-// 			printf("Arquivo de dados compactado com sucesso.\n");
-// 			rewind(newbinario);
-// 			binario_h.status = '1';
-// 			fwrite(&binario_h.status, sizeof(binario_h.status), 1, newbinario);
-// 			fclose(newbinario);
-// 			fclose(oldbinario);
-// 			unlink(nome_arq_binario);
-// 			rename("tmp.dat", nome_arq_binario);
-// 		}
-// 		else
-// 		{
-// 			printf("Falha no processamento do arquivo.\n");
-// 		}
-// 	}
-// 	else
-// 	{
-// 		printf("Falha no processamento do arquivo.\n");
-// }
+void file_compact(const char *nome_arq_binario)
+{
+	FILE *oldbin = NULL, *newbin = NULL;
+	HEADER oldbinario_h, newbinario_h;
+	int campos_variaveis_size = 0, codigoINEP = 0, regsize = 28, i = 0;
+	char byte_padding = '0', prestadora[20], data[11], escola[50], cidade[70], uf[3];
+	char *tmp_arq = "tmp.dat";
+	if(nome_arq_binario != NULL)
+	{
+		oldbin = fopen(nome_arq_binario, "r+b");
+		if(oldbin != NULL)
+		{
+			fread(&oldbinario_h.status, sizeof(oldbinario_h.status), 1, oldbin);
+			if(oldbinario_h.status == '1') // Se o arquivo de dados antigo esta consistente, realiza a compactacao
+			{
+				fread(&oldbinario_h.topoPilha, sizeof(oldbinario_h.topoPilha), 1, oldbin); // Obtem o topo da pilha do arquivo antigo para verificar se necessita realizar a compactacao
+				if(oldbinario_h.topoPilha != -1)
+				{
+					oldbinario_h.status = '0';
+					rewind(oldbin);
+					fwrite(&oldbinario_h.status, sizeof(oldbinario_h.status), 1, oldbin);
+					fseek(oldbin, (IN_DISK_HEADER_SIZE - 1), SEEK_CUR);
+					newbin = fopen(tmp_arq, "wb");
+					if(newbin != NULL)
+					{
+						// Escreve o cabecalho do arquivo compactado
+						newbinario_h.status = '0';
+						newbinario_h.topoPilha = -1;
+						fwrite(&newbinario_h.status, sizeof(newbinario_h.status), 1, newbin);
+						fwrite(&newbinario_h.topoPilha, sizeof(newbinario_h.topoPilha), 1, newbin);
+
+						while(1)
+						{
+							memset(uf, 0x00, sizeof(uf));
+							memset(data, 0x00, sizeof(data));
+							memset(escola, 0x00, sizeof(escola));
+							memset(cidade, 0x00, sizeof(cidade));
+							memset(prestadora, 0x00, sizeof(prestadora));
+
+							fread(&codigoINEP, sizeof(codigoINEP), 1, oldbin);
+							if(codigoINEP != -1 && feof(oldbin) == 0) // Se o registro nao foi removido logicamente no arquivo antigo
+							{
+								fwrite(&codigoINEP, sizeof(codigoINEP), 1, newbin); // Escreve codigoINEP no arquivo compactado
+								fread(data, (sizeof(data) - 1), 1, oldbin); // Recupera o campo data do arquivo de dados antigo
+								fwrite(data, (sizeof(data) - 1), 1, newbin); // Escreve o campo data no arquivo de dados compactado
+								fread(uf, (sizeof(uf) - 1), 1, oldbin); // Recupera o campo uf do arquivo de dados antigo
+								fwrite(uf, (sizeof(uf) - 1), 1, newbin); // Escreve o campo data no arquivo de dados compactado
+								fread(&campos_variaveis_size, sizeof(campos_variaveis_size), 1, oldbin); // Recupera o indicador de tamanho do campo nomeEscola do arquivo de dadosantigo
+								fwrite(&campos_variaveis_size, sizeof(campos_variaveis_size), 1, newbin); // Escreve o indicador de tamanho do campo nomeEscola do arquivo de dados compactado
+								regsize += campos_variaveis_size; // Aumenta o tamanho do registro
+								if(campos_variaveis_size > 0) // Se o indicador de nomeEscola for maior que 0, entao escreve o campo nomeEscola no arquivo de dados compactado
+								{
+									fread(escola, campos_variaveis_size, 1, oldbin);
+									fwrite(escola, campos_variaveis_size, 1, newbin);
+								}
+								fread(&campos_variaveis_size, sizeof(campos_variaveis_size), 1, oldbin); // Recupera o indicador de tamanho do campo municipio do arquivo de dadosantigo
+								fwrite(&campos_variaveis_size, sizeof(campos_variaveis_size), 1, newbin); // Escreve o indicador de tamanho do campo municipio do arquivo de dados compactado
+								regsize += campos_variaveis_size;
+								if(campos_variaveis_size > 0)
+								{
+									fread(cidade, campos_variaveis_size, 1, oldbin);
+									fwrite(cidade, campos_variaveis_size, 1, newbin);
+								}
+								fread(&campos_variaveis_size, sizeof(campos_variaveis_size), 1, oldbin); // Recupera o indicador de tamanho do campo prestadora do arquivo de dadosantigo
+								fwrite(&campos_variaveis_size, sizeof(campos_variaveis_size), 1, newbin); // Escreve o indicador de tamanho do campo prestadora do arquivo de dados compactado
+								regsize += campos_variaveis_size;
+								if(campos_variaveis_size > 0)
+								{
+									fread(prestadora, campos_variaveis_size, 1, oldbin);
+									fwrite(prestadora, campos_variaveis_size, 1, newbin);
+								}
+								if(regsize < IN_DISK_REG_SIZE && feof(oldbin) == 0) // Se o registro nao atingiu o tamanho fixo de 87 bytes, adiciona byte padding ao registro do arquivo de dados compactado
+								{
+									fseek(oldbin, (IN_DISK_REG_SIZE - regsize), SEEK_CUR);
+									fwrite(&byte_padding, sizeof(char), (IN_DISK_REG_SIZE - regsize), newbin);
+								}
+								else if(feof(oldbin) != 0)
+								{
+									break;
+								}
+							}
+							else
+							{
+								if(feof(oldbin) == 0)
+								{
+									fseek(oldbin, IN_DISK_REG_SIZE - sizeof(int), SEEK_CUR);
+								}
+								else
+								{
+									break;
+								}
+							}
+							regsize = 28;
+						} // While bracket
+						newbinario_h.status = '1';
+						rewind(newbin);
+						fwrite(&newbinario_h.status, sizeof(newbinario_h.status), 1, newbin);
+						fclose(newbin);
+					}
+					else
+					{
+						printf("Falha no processamento do arquivo newbin\n");
+					}
+				}
+				else
+				{
+					printf("O arquivo nao necessita ser compactado.\n");
+				}
+			}
+			else
+			{
+				printf("Arquivo inconsistente\n");
+			}
+			oldbinario_h.status = '1';
+			rewind(oldbin);
+			fwrite(&oldbinario_h.status, sizeof(oldbinario_h.status), 1, oldbin);
+			fclose(oldbin);
+			if(remove(nome_arq_binario) != -1)
+			{
+				if(rename(tmp_arq, nome_arq_binario) != -1)
+				{
+					printf("Arquivo de dados compactado com sucesso.\n");
+				}
+				else
+				{
+					printf("Nao foi possivel renomear o arquivo compactado\n");
+				}
+			}
+			else
+			{
+				printf("Nao foi possivel excluir o arquivo de dados antigo\n");
+			}
+		}
+		else
+		{
+			printf("Falha no processamento do arquivo oldbin\n");
+		}
+	} // nome_arq_binario != NULL test bracket
+}
