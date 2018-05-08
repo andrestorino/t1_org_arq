@@ -15,6 +15,8 @@
     	void file_add_record(const char *nome_arq_binario, int newCodigoINEP, char *newData, char *newUF, char *newEscola, char *newCidade, char *newPrestadora); // funcao para adicionar um registro
         // funcionalidade 7
         void file_update_rrn(const char *nome_arq_binario, int rrn, int newCodigoINEP, char *newData, char *newUF, char *newEscola, char *newCidade, char *newPrestadora);// funcao para atualizar os campos do registro dado seu RRN
+        // funcionalidade 8
+        void file_compact(const char *nome_arq_binario);
         // funcionalidade 9
         void file_print_stack(const char *nome_arq_binario); // funcao para imprimir a pilha
 
