@@ -352,7 +352,7 @@ void file_filter_by_criteria(const char *nome_arq_binario, const char *campo, co
 				fread(&codigoINEP, sizeof(codigoINEP), 1, binario);
 
 				if(codigoINEP != -1 && feof(binario) == 0){
-					if(strncmp("codINEP", campo, sizeof(campo)) == 0 && codigoINEP == atoi(chave)) {
+					if(strncmp("codINEP", campo, strlen(campo)) == 0 && codigoINEP == atoi(chave)) {
 						printRegister = 1;
 					}
 
@@ -360,7 +360,7 @@ void file_filter_by_criteria(const char *nome_arq_binario, const char *campo, co
 					fread(data, (sizeof(data) - 1), 1, binario);
 					if(strcmp(data, "0000000000") != 0)
 					{
-						if(strncmp("dataAtiv", campo, sizeof(campo)) == 0 && strncmp(data, chave, strlen(chave)) == 0) {
+						if(strncmp("dataAtiv", campo, strlen(campo)) == 0 && strncmp(data, chave, strlen(chave)) == 0) {
 							printRegister = 1;
 						}
 					}
@@ -368,7 +368,7 @@ void file_filter_by_criteria(const char *nome_arq_binario, const char *campo, co
 					fread(uf, (sizeof(uf) - 1), 1, binario);
 					if(uf[0] != '0')
 					{
-						if(strncmp("uf", campo, sizeof(campo)) == 0 && strncmp(uf, chave, strlen(chave)) == 0) {
+						if(strncmp("uf", campo, strlen(campo)) == 0 && strncmp(uf, chave, strlen(chave)) == 0) {
 							printRegister = 1;
 						}
 					}
@@ -380,7 +380,7 @@ void file_filter_by_criteria(const char *nome_arq_binario, const char *campo, co
 					if(campos_variaveis_size > 0)
 					{
 						escolaChecker = campos_variaveis_size;
-						if(strncmp("nomeEscola", campo, sizeof(campo)) == 0 && strncmp(escola, chave, strlen(chave)) == 0) {
+						if(strncmp("nomeEscola", campo, strlen(campo)) == 0 && strncmp(escola, chave, strlen(chave)) == 0) {
 							printRegister = 1;
 						}
 					}
@@ -392,7 +392,7 @@ void file_filter_by_criteria(const char *nome_arq_binario, const char *campo, co
 					if(campos_variaveis_size > 0)
 					{
 						cidadeChecker = campos_variaveis_size;
-						if(strncmp("municipio", campo, sizeof(campo)) == 0 && strncmp(cidade, chave, strlen(chave)) == 0) {
+						if(strncmp("municipio", campo, strlen(campo)) == 0 && strncmp(cidade, chave, strlen(chave)) == 0) {
 							printRegister = 1;
 						}
 					}
@@ -404,7 +404,7 @@ void file_filter_by_criteria(const char *nome_arq_binario, const char *campo, co
 					if(campos_variaveis_size > 0)
 					{
 						prestadoraChecker = campos_variaveis_size;
-						if(strncmp("prestadora", campo, sizeof(campo)) == 0 && strncmp(prestadora, chave, strlen(chave)) == 0) {
+						if(strncmp("prestadora", campo, strlen(campo)) == 0 && strncmp(prestadora, chave, strlen(chave)) == 0) {
 							printRegister = 1;
 						}
 					}
