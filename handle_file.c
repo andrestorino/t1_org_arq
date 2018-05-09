@@ -156,35 +156,32 @@ void file_read_all_binary(const char *nome_arq_binario){
 				if(codigoINEP != -1 && feof(binario) == 0){
 					printf("%d ", codigoINEP);
 					fread(data, (sizeof(data) - 1), 1, binario);
-					if(strcmp(data, "0000000000") != 0)
-					{
-						printf("%s ", data);
-					}
+					printf("%s ", data);
 					fread(uf, (sizeof(uf) - 1), 1, binario);
-					if(uf[0] != '0')
-					{
-						printf("%s ", uf);
-					}
+					printf("%s ", uf);
 					fread(&campos_variaveis_size, sizeof(int), 1, binario);
 					reg_size = reg_size + campos_variaveis_size;
+					printf("%d ", campos_variaveis_size);
 					fread(escola, campos_variaveis_size, 1, binario);
 					if(campos_variaveis_size > 0)
 					{
-						printf("%d %s ", campos_variaveis_size, escola);
+						printf("%s ", escola);
 					}
 					fread(&campos_variaveis_size, sizeof(int), 1, binario);
 					reg_size = reg_size + campos_variaveis_size;
+					printf("%d ", campos_variaveis_size);
 					fread(cidade, campos_variaveis_size, 1, binario);
 					if(campos_variaveis_size > 0)
 					{
-						printf("%d %s ", campos_variaveis_size, cidade);
+						printf("%s ", cidade);
 					}
 					fread(&campos_variaveis_size, sizeof(int), 1, binario);
 					reg_size = reg_size + campos_variaveis_size;
+					printf("%d ", campos_variaveis_size);
 					fread(prestadora, campos_variaveis_size, 1, binario);
 					if(campos_variaveis_size > 0)
 					{
-						printf("%d %s", campos_variaveis_size, prestadora);
+						printf("%s", prestadora);
 					}
 					printf("\n");
 					if (reg_size < IN_DISK_REG_SIZE && feof(binario) == 0) {
@@ -250,15 +247,9 @@ void file_read_binary_rrn(const char *nome_arq_binario, const int rrn)
 					{
 						printf("%d ", codigoINEP);
 						fread(data, (sizeof(data) - 1), 1, binario);
-						if(strcmp(data, "0000000000") != 0)
-						{
-							printf("%s ", data);
-						}
+						printf("%s ", data);
 						fread(uf, (sizeof(uf) - 1), 1, binario);
-						if(uf[0] != '0')
-						{
-							printf("%s ", uf);
-						}
+						printf("%s ", uf);
 						fread(&campos_variaveis_size, sizeof(int), 1, binario);
 						printf("%d ", campos_variaveis_size);
 						if(campos_variaveis_size > 0)
@@ -412,11 +403,14 @@ void file_filter_by_criteria(const char *nome_arq_binario, const char *campo, co
 					if(printRegister) { // Se encontrou algum registro que satisfaz o criterio
 						// PRINT_OUTPUT
 						printf("%d ", codigoINEP);
-						if(strcmp(data, "0000000000") != 0) printf("%s ", data);
-						if(uf[0] != '0') printf("%s ", uf);
+						printf("%s ", data);
+						printf("%s ", uf);
 						if(escolaChecker > 0) printf("%d %s ", escolaChecker, escola);
+						else printf("%d ", escolaChecker);
 						if(cidadeChecker > 0) printf("%d %s ", cidadeChecker, cidade);
+						else printf("%d ", escolaChecker);
 						if(prestadoraChecker > 0) printf("%d %s", prestadoraChecker, prestadora);
+						else printf("%d ", prestadoraChecker);
 						printf("\n");
 						printRegister = 0;
 						print_flag = 1;
