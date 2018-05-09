@@ -1,7 +1,7 @@
 /*
 	Nome: Andre Luis Storino Junior, N USP: 9293668
 	Nome: Francisco Mattos Fortes, N USP: 4590431
-	Nome: Leonardo, N USP:
+	Nome: Leonardo Mendes Bonato, N USP: 9074308
 	Nome: Paulo Ricardo J. Miranda, N USP: 10133456
 */
 #include <stdlib.h>
