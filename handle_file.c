@@ -225,92 +225,6 @@ void file_read_all_binary(const char *nome_arq_binario){
 	}
 }
 
-// Funcionalidade 4
-void file_read_binary_rrn(const char *nome_arq_binario, const int rrn)
-{
-	if(nome_arq_binario != NULL)
-	{
-		FILE *binario = NULL;
-		HEADER binario_h; // cabecalho do arquivo de dados
-		int campos_variaveis_size = 0, codigoINEP = 0; // campos_variaveis_size guarda o tamanho dos campos variaveis
-		char prestadora[10], data[11], escola[50], cidade[70], uf[3]; // Variaveis utilizadas na recuperacao dos campos do registro
-		memset(uf, 0x00, sizeof(uf));
-		memset(data, 0x00, sizeof(data));
-		memset(prestadora, 0x00, sizeof(prestadora));
-		memset(escola, 0x00, sizeof(escola));
-		memset(cidade, 0x00, sizeof(cidade));
-		binario = fopen(nome_arq_binario, "r+b");
-		if(binario != NULL)
-		{
-			fread(&binario_h.status, sizeof(binario_h.status), 1, binario);
-			if(binario_h.status == '1') // Se o arquivo esta consistente
-			{
-				rewind(binario);
-				binario_h.status = '0';
-				fwrite(&binario_h.status, sizeof(binario_h.status), 1, binario);
-				fseek(binario, (IN_DISK_REG_SIZE * (rrn - 1)) + (IN_DISK_HEADER_SIZE - 1), SEEK_CUR);
-				if(fread(&codigoINEP, sizeof(codigoINEP), 1, binario) > 0)
-				{
-					if(codigoINEP != -1)
-					{
-						printf("%d ", codigoINEP);
-						fread(data, (sizeof(data) - 1), 1, binario);
-						printf("%s ", data);
-						fread(uf, (sizeof(uf) - 1), 1, binario);
-						printf("%s ", uf);
-						fread(&campos_variaveis_size, sizeof(int), 1, binario);
-						printf("%d ", campos_variaveis_size);
-						if(campos_variaveis_size > 0)
-						{
-							fread(escola, campos_variaveis_size, 1, binario);
-							printf("%s ", escola);
-						}
-						fread(&campos_variaveis_size, sizeof(int), 1, binario);
-						printf("%d ", campos_variaveis_size);
-						if(campos_variaveis_size > 0)
-						{
-							fread(cidade, campos_variaveis_size, 1, binario);
-							printf("%s ", cidade);
-						}
-						fread(&campos_variaveis_size, sizeof(int), 1, binario);
-						printf("%d ", campos_variaveis_size);
-						if(campos_variaveis_size > 0)
-						{
-							fread(prestadora, campos_variaveis_size, 1, binario);
-							printf("%s", prestadora);
-						}
-						printf("\n");
-					}
-					else
-					{
-						printf("Registro inexistente.\n");
-					}
-				}
-				else
-				{
-					printf("Registro inexistente.\n");
-				}
-				rewind(binario);
-				binario_h.status = '1';
-				fwrite(&binario_h.status, sizeof(binario_h.status), 1, binario);
-			}
-			else // Se o arquivo nao esta consistente
-			{
-				printf("Arquivo inconsistente.\n");
-			}
-			fclose(binario);
-		}
-		else
-		{
-			printf("Falha no processamento do arquivo.\n");
-		}
-	}
-	else
-	{
-		printf("Falha no processamento do arquivo.\n");
-	}
-}
-
 // Funcionalidade 3
 void file_filter_by_criteria(const char *nome_arq_binario, const char *campo, const char *chave) {
 	if (nome_arq_binario == NULL) {
@@ -463,6 +377,92 @@ void file_filter_by_criteria(const char *nome_arq_binario, const char *campo, co
 	}
 }
 
+// Funcionalidade 4
+void file_read_binary_rrn(const char *nome_arq_binario, const int rrn)
+{
+	if(nome_arq_binario != NULL)
+	{
+		FILE *binario = NULL;
+		HEADER binario_h; // cabecalho do arquivo de dados
+		int campos_variaveis_size = 0, codigoINEP = 0; // campos_variaveis_size guarda o tamanho dos campos variaveis
+		char prestadora[10], data[11], escola[50], cidade[70], uf[3]; // Variaveis utilizadas na recuperacao dos campos do registro
+		memset(uf, 0x00, sizeof(uf));
+		memset(data, 0x00, sizeof(data));
+		memset(prestadora, 0x00, sizeof(prestadora));
+		memset(escola, 0x00, sizeof(escola));
+		memset(cidade, 0x00, sizeof(cidade));
+		binario = fopen(nome_arq_binario, "r+b");
+		if(binario != NULL)
+		{
+			fread(&binario_h.status, sizeof(binario_h.status), 1, binario);
+			if(binario_h.status == '1') // Se o arquivo esta consistente
+			{
+				rewind(binario);
+				binario_h.status = '0';
+				fwrite(&binario_h.status, sizeof(binario_h.status), 1, binario);
+				fseek(binario, (IN_DISK_REG_SIZE * (rrn - 1)) + (IN_DISK_HEADER_SIZE - 1), SEEK_CUR);
+				if(fread(&codigoINEP, sizeof(codigoINEP), 1, binario) > 0)
+				{
+					if(codigoINEP != -1)
+					{
+						printf("%d ", codigoINEP);
+						fread(data, (sizeof(data) - 1), 1, binario);
+						printf("%s ", data);
+						fread(uf, (sizeof(uf) - 1), 1, binario);
+						printf("%s ", uf);
+						fread(&campos_variaveis_size, sizeof(int), 1, binario);
+						printf("%d ", campos_variaveis_size);
+						if(campos_variaveis_size > 0)
+						{
+							fread(escola, campos_variaveis_size, 1, binario);
+							printf("%s ", escola);
+						}
+						fread(&campos_variaveis_size, sizeof(int), 1, binario);
+						printf("%d ", campos_variaveis_size);
+						if(campos_variaveis_size > 0)
+						{
+							fread(cidade, campos_variaveis_size, 1, binario);
+							printf("%s ", cidade);
+						}
+						fread(&campos_variaveis_size, sizeof(int), 1, binario);
+						printf("%d ", campos_variaveis_size);
+						if(campos_variaveis_size > 0)
+						{
+							fread(prestadora, campos_variaveis_size, 1, binario);
+							printf("%s", prestadora);
+						}
+						printf("\n");
+					}
+					else
+					{
+						printf("Registro inexistente.\n");
+					}
+				}
+				else
+				{
+					printf("Registro inexistente.\n");
+				}
+				rewind(binario);
+				binario_h.status = '1';
+				fwrite(&binario_h.status, sizeof(binario_h.status), 1, binario);
+			}
+			else // Se o arquivo nao esta consistente
+			{
+				printf("Arquivo inconsistente.\n");
+			}
+			fclose(binario);
+		}
+		else
+		{
+			printf("Falha no processamento do arquivo.\n");
+		}
+	}
+	else
+	{
+		printf("Falha no processamento do arquivo.\n");
+	}
+}
+
 // Funcionalidade 5
 void file_delete_record(const char *nome_arq_binario, int rrn)
 {
@@ -501,135 +501,6 @@ void file_delete_record(const char *nome_arq_binario, int rrn)
 				rewind(binario); // Volta o poteiro do arquivo para o comeco do mesmo
 				fwrite(&binario_h.status, sizeof(binario_h.status), 1, binario);
 				fwrite(&binario_h.topoPilha, sizeof(binario_h.topoPilha), 1, binario); // Atualiza o topo da pilha
-			}
-			else
-			{
-				printf("Arquivo inconsistente\n");
-			}
-			fclose(binario);
-		}
-		else
-		{
-			printf("Falha no processamento do arquivo.\n");
-		}
-	}
-	else
-	{
-		printf("Falha no processamento do arquivo.\n");
-	}
-}
-
-// Funcionalidade 7
-void file_update_rrn(const char *nome_arq_binario, int rrn, int newCodigoINEP, char *newData, char *newUF, char *newEscola, char *newCidade, char *newPrestadora){
-	char status = '0', bytePadding = '0', nulo = '0';
-	FILE *binario = NULL;
-	int campos_variaveis_size, isRemoved, regsize;
-
-	binario = fopen(nome_arq_binario, "r+b");
-	if(binario != NULL){
-		fread(&status, sizeof(status), 1, binario);
-		if(status == '1')
-		{
-			status = '0';
-			rewind(binario);
-			fwrite(&status, sizeof(status), 1, binario);
-			fseek(binario, (IN_DISK_REG_SIZE * (rrn - 1)) + sizeof(int), SEEK_CUR);
-			if(fread(&isRemoved, sizeof(int), 1, binario) > 0){
-				if(isRemoved != -1){
-					fseek(binario, -sizeof(isRemoved), SEEK_CUR);
-					regsize = 28;
-					fwrite(&newCodigoINEP, sizeof(newCodigoINEP), 1, binario);
-					if(strcmp(newData, "0000000000") == 0)
-					{
-						for(int i = 0; i < 10; i++)
-							fwrite(&nulo, sizeof(char), 1, binario);
-					}
-					else fwrite(newData, strlen(newData), 1, binario);
-					if(newUF[0] == '0')
-					{
-						for(int i = 0; i < 2; i++)
-							fwrite(&nulo, sizeof(char), 1, binario);
-					}
-					else fwrite(newUF, strlen(newUF), 1, binario);
-					campos_variaveis_size = strlen(newEscola);
-					regsize += campos_variaveis_size;
-					fwrite(&campos_variaveis_size, sizeof(int), 1, binario);
-					if(campos_variaveis_size > 0) fwrite(newEscola, campos_variaveis_size, 1, binario);
-					campos_variaveis_size = strlen(newCidade);
-					regsize += campos_variaveis_size;
-					fwrite(&campos_variaveis_size, sizeof(int), 1, binario);
-					if(campos_variaveis_size > 0) fwrite(newCidade, campos_variaveis_size, 1, binario);
-					campos_variaveis_size = strlen(newPrestadora);
-					regsize += campos_variaveis_size;
-					fwrite(&campos_variaveis_size, sizeof(int), 1, binario);
-					if(campos_variaveis_size > 0) fwrite(newPrestadora, campos_variaveis_size, 1, binario);
-					if(regsize < 87) fwrite(&bytePadding, sizeof(char), IN_DISK_REG_SIZE - regsize, binario);
-					printf("Registro alterado com sucesso.\n");
-				}
-				else{
-					printf("Registro inexistente.\n");
-				}
-			}
-			else
-			{
-				printf("Registro inexistente.\n");
-			}
-			status = '1';
-			rewind(binario);
-			fwrite(&status, sizeof(status), 1, binario);
-		}
-		else
-		{
-			printf("Arquivo inconsistente\n");
-		}
-		fclose(binario);
-	}
-	else{
-		printf("Falha no processamento do arquivo.\n");
-	}
-}
-
-// Funcionalidade 9
-void file_print_stack(const char *nome_arq_binario)
-{
-	if(nome_arq_binario != NULL)
-	{
-		HEADER binario_h;
-		FILE *binario = NULL;
-		int tmp_pilha = -1, marca = -1;
-		binario = fopen(nome_arq_binario, "r+b");
-		if(binario != NULL)
-		{
-			fread(&binario_h.status, sizeof(binario_h.status), 1, binario);
-			if(binario_h.status == '1')
-			{
-				rewind(binario);
-				binario_h.status = '0';
-				fwrite(&binario_h.status, sizeof(binario_h.status), 1, binario);
-
-				fseek(binario, sizeof(binario_h.status), SEEK_SET);
-
-				fread(&binario_h.topoPilha, sizeof(binario_h.topoPilha), 1, binario);
-				tmp_pilha = binario_h.topoPilha;
-				if(tmp_pilha != -1)
-				{
-					while(tmp_pilha != -1)
-					{
-						printf("%d ", tmp_pilha);
-						fseek(binario, ((tmp_pilha - 1) * IN_DISK_REG_SIZE) + IN_DISK_HEADER_SIZE, SEEK_SET);
-						fread(&marca, sizeof(marca), 1, binario);
-						fread(&tmp_pilha, sizeof(tmp_pilha), 1, binario);
-					}
-				}
-				else
-				{
-					printf("Pilha vazia.");
-				}
-				printf("\n");
-				binario_h.status = '1';
-				rewind(binario);
-				fwrite(&binario_h.status, sizeof(binario_h.status), 1, binario);
-				fwrite(&binario_h.topoPilha, sizeof(binario_h.topoPilha), 1, binario);
 			}
 			else
 			{
@@ -747,6 +618,76 @@ void file_add_record(const char *nome_arq_binario, int newCodigoINEP, char *newD
 	}
 	else
 	{
+		printf("Falha no processamento do arquivo.\n");
+	}
+}
+
+// Funcionalidade 7
+void file_update_rrn(const char *nome_arq_binario, int rrn, int newCodigoINEP, char *newData, char *newUF, char *newEscola, char *newCidade, char *newPrestadora){
+	char status = '0', bytePadding = '0', nulo = '0';
+	FILE *binario = NULL;
+	int campos_variaveis_size, isRemoved, regsize;
+
+	binario = fopen(nome_arq_binario, "r+b");
+	if(binario != NULL){
+		fread(&status, sizeof(status), 1, binario);
+		if(status == '1')
+		{
+			status = '0';
+			rewind(binario);
+			fwrite(&status, sizeof(status), 1, binario);
+			fseek(binario, (IN_DISK_REG_SIZE * (rrn - 1)) + sizeof(int), SEEK_CUR);
+			if(fread(&isRemoved, sizeof(int), 1, binario) > 0){
+				if(isRemoved != -1){
+					fseek(binario, -sizeof(isRemoved), SEEK_CUR);
+					regsize = 28;
+					fwrite(&newCodigoINEP, sizeof(newCodigoINEP), 1, binario);
+					if(strcmp(newData, "0000000000") == 0)
+					{
+						for(int i = 0; i < 10; i++)
+							fwrite(&nulo, sizeof(char), 1, binario);
+					}
+					else fwrite(newData, strlen(newData), 1, binario);
+					if(newUF[0] == '0')
+					{
+						for(int i = 0; i < 2; i++)
+							fwrite(&nulo, sizeof(char), 1, binario);
+					}
+					else fwrite(newUF, strlen(newUF), 1, binario);
+					campos_variaveis_size = strlen(newEscola);
+					regsize += campos_variaveis_size;
+					fwrite(&campos_variaveis_size, sizeof(int), 1, binario);
+					if(campos_variaveis_size > 0) fwrite(newEscola, campos_variaveis_size, 1, binario);
+					campos_variaveis_size = strlen(newCidade);
+					regsize += campos_variaveis_size;
+					fwrite(&campos_variaveis_size, sizeof(int), 1, binario);
+					if(campos_variaveis_size > 0) fwrite(newCidade, campos_variaveis_size, 1, binario);
+					campos_variaveis_size = strlen(newPrestadora);
+					regsize += campos_variaveis_size;
+					fwrite(&campos_variaveis_size, sizeof(int), 1, binario);
+					if(campos_variaveis_size > 0) fwrite(newPrestadora, campos_variaveis_size, 1, binario);
+					if(regsize < 87) fwrite(&bytePadding, sizeof(char), IN_DISK_REG_SIZE - regsize, binario);
+					printf("Registro alterado com sucesso.\n");
+				}
+				else{
+					printf("Registro inexistente.\n");
+				}
+			}
+			else
+			{
+				printf("Registro inexistente.\n");
+			}
+			status = '1';
+			rewind(binario);
+			fwrite(&status, sizeof(status), 1, binario);
+		}
+		else
+		{
+			printf("Arquivo inconsistente\n");
+		}
+		fclose(binario);
+	}
+	else{
 		printf("Falha no processamento do arquivo.\n");
 	}
 }
@@ -890,4 +831,63 @@ void file_compact(const char *nome_arq_binario)
 			printf("Falha no processamento do arquivo oldbin\n");
 		}
 	} // nome_arq_binario != NULL test bracket
+}
+
+// Funcionalidade 9
+void file_print_stack(const char *nome_arq_binario)
+{
+	if(nome_arq_binario != NULL)
+	{
+		HEADER binario_h;
+		FILE *binario = NULL;
+		int tmp_pilha = -1, marca = -1;
+		binario = fopen(nome_arq_binario, "r+b");
+		if(binario != NULL)
+		{
+			fread(&binario_h.status, sizeof(binario_h.status), 1, binario);
+			if(binario_h.status == '1')
+			{
+				rewind(binario);
+				binario_h.status = '0';
+				fwrite(&binario_h.status, sizeof(binario_h.status), 1, binario);
+
+				fseek(binario, sizeof(binario_h.status), SEEK_SET);
+
+				fread(&binario_h.topoPilha, sizeof(binario_h.topoPilha), 1, binario);
+				tmp_pilha = binario_h.topoPilha;
+				if(tmp_pilha != -1)
+				{
+					while(tmp_pilha != -1)
+					{
+						printf("%d ", tmp_pilha);
+						fseek(binario, ((tmp_pilha - 1) * IN_DISK_REG_SIZE) + IN_DISK_HEADER_SIZE, SEEK_SET);
+						fread(&marca, sizeof(marca), 1, binario);
+						fread(&tmp_pilha, sizeof(tmp_pilha), 1, binario);
+					}
+				}
+				else
+				{
+					printf("Pilha vazia.");
+				}
+				printf("\n");
+				binario_h.status = '1';
+				rewind(binario);
+				fwrite(&binario_h.status, sizeof(binario_h.status), 1, binario);
+				fwrite(&binario_h.topoPilha, sizeof(binario_h.topoPilha), 1, binario);
+			}
+			else
+			{
+				printf("Arquivo inconsistente\n");
+			}
+			fclose(binario);
+		}
+		else
+		{
+			printf("Falha no processamento do arquivo.\n");
+		}
+	}
+	else
+	{
+		printf("Falha no processamento do arquivo.\n");
+	}
 }
