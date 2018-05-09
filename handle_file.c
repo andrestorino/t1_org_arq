@@ -18,9 +18,9 @@ void file_read_csv_write_binary(const char *nome_arq_dados, const char *nome_arq
 {
 	if(nome_arq_dados != NULL)
 	{
-		int codigoINEP = 0, escola_size = 0, cidade_size = 0, prestadora_size = 0, total_bytes = 0;
-		char byte_padding = '0', prestadora[10], data[11], escola[50], cidade[70], uf[3], line[300], *token = NULL;
-		HEADER binario_h;
+		int codigoINEP = 0, escola_size = 0, cidade_size = 0, prestadora_size = 0, total_bytes = 0; // variaveis para guardar o codigo recuperado do arquivo csv e tambem os tamanhos dos campos variaveis
+		char byte_padding = '0', prestadora[10], data[11], escola[50], cidade[70], uf[3], line[300], *token = NULL; // variaveis para guardar os campos recuperados de tam fixo e variavel
+		HEADER binario_h; // cabecalho do arquivo de dados binario
 		FILE *csv = NULL, *binario = NULL;
 		binario_h.topoPilha = -1;
 		binario_h.status = '0';
@@ -30,15 +30,23 @@ void file_read_csv_write_binary(const char *nome_arq_dados, const char *nome_arq
 		fwrite(&binario_h.topoPilha, sizeof(binario_h.topoPilha), 1, binario);
 		while(1)
 		{
-			strcpy(uf, "00");
+			strcpy(uf, "00"); // Zera os campos uf, data, escola, cidade e prestadora
 			strcpy(data, "0000000000");
 			strcpy(escola, "");
 			strcpy(cidade, "");
 			strcpy(prestadora, "");
-			fgets(line, sizeof(line), csv);
+			fgets(line, sizeof(line), csv); // le a linha do arquivo csv
 			token = line;
 			if(feof(csv) == 0) // Se o fim do arquivo nao foi setado
 			{
+				/*
+					As linhas abaixo, de uma forma geral, verificam onde existem campos nulos ou nao, na linha
+					lida do arquivo csv. A variavel token e um ponteiro para o caractere ';', entao, a funcao stchr procura a
+					primeira ocorrencia do caractere ';' e retorna um ponteiro para a posicao onde o mesmo se encontra.
+					Dai, basta apenas verifica se o caractere na posicao 0 do token e o caractere ';'. Se for, indica que o campo e nulo.
+					Caso contrario, e um campo nao nulo.
+					A funcao sscanf e como a funcao scanf, exceto por trabalhar em strings ao inves de streams.
+				*/
 				if(token[0] != ';')
 				{
 					sscanf(token, " %10[^;]", prestadora);
